@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Instructor {
+  id             Int            @id() @default(autoincrement())
+  name           String
+  email          String         @unique
+  bio            String?
+  courses        Course[]
+  comments       Comment[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Course {
+  id              Int            @id @default(autoincrement())
+  name            String
+  description     String
+  maxSeats        Int
+  leftSeats       Int
+  startDate       DateTime
+  endDate         DateTime
+  price           Decimal
+  status          String         @default("draft")
+  instructorId    Int
+  instructor      Instructor    @relation(fields: [instructorId] , references: [id])
+  leads           Lead[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt 
+
+}
+
+model Lead {
+  id              Int            @id @default(autoincrement())
+  name            String
+  email           String         @unique
+  phone           String?
+  linkedinProfile String?
+  status          Status         @default(PENDING)
+  courseId        Int
+  course          Course         @relation(fields: [courseId], references: [id])
+  comments        Comment[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+}
+
+model Comment {
+  id             Int            @id @default(autoincrement())
+  content        String
+  leadId         Int
+  lead           Lead           @relation(fields: [leadId], references: [id])
+  instructorId   Int
+  instructor     Instructor     @relation(fields: [instructorId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+enum Status {
+  ACCEPT
+  REJECT
+  PENDING
+}
